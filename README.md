@@ -58,6 +58,24 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+
+# TypeOrm Migrations
+
+## Create migration:
+```bash
+npx typeorm migration:create src/migrations/CoffeeRefactor
+```
+
+## Run migration:
+```bash
+npx typeorm migration:run -d dist/typeorm-cli.config
+```
+
+## Revert migration:
+```bash
+npx typeorm migration:revert -d dist/typeorm-cli.config
+```
+
 ## Resources
 
 Check out a few resources that may come in handy when working with NestJS:
