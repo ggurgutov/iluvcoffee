@@ -1,21 +1,37 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Res, SetMetadata, UsePipes, ValidationPipe } from '@nestjs/common';
 import { CoffeesService } from './coffees.service';
 import { CreateCoffeeDto } from './dto/create-coffee.dto';
 import { UpdateCoffeeDto } from './dto/update-coffee.dto';
 import { PaginationQueryDto } from "../common/dto/pagination-query.dto"
+import { Public } from 'src/common/decorators/public.decorator';
+import { ParseIntPipe } from 'src/common/pipes/parse-int';
+import { Protocol } from 'src/common/decorators/protoccol.decorator';
+import { ApiForbiddenResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('coffees')
+// @UsePipes(ValidationPipe)
 @Controller('coffees')
 export class CoffeesController {
 
     constructor(private readonly coffeesService: CoffeesService) { }
 
+    // @ApiResponse({
+    //     status: 403,
+    //     description: 'Forbidden.'
+    // })
+    @ApiForbiddenResponse({ description: 'Forbidden' })
+    // @SetMetadata('isPublic', true)
+    @Public()
+    @UsePipes(ValidationPipe)
     @Get()
-    findAll(@Query() paginatedQuery: PaginationQueryDto) {
+    async findAll(@Protocol('https') protocol: string, @Query() paginatedQuery: PaginationQueryDto) {
+        console.log('==Protocol', protocol);
+        // await new Promise(resolve => setTimeout(resolve, 5000)); // to test timeout interceptor
         return this.coffeesService.findAll(paginatedQuery);
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string) {
+    findOne(@Param('id', ParseIntPipe) id: string) {
         return this.coffeesService.findOne(id);
     }
 
@@ -26,7 +42,8 @@ export class CoffeesController {
     }
 
     @Patch(':id')
-    update(@Param('id') id: string, @Body() updateCoffeeDto: UpdateCoffeeDto) {
+    // update(@Param('id') id: string, @Body() updateCoffeeDto: UpdateCoffeeDto) {
+    update(@Param('id') id: string, @Body(ValidationPipe) updateCoffeeDto: UpdateCoffeeDto) {
         return this.coffeesService.update(id, updateCoffeeDto)
     }
 
